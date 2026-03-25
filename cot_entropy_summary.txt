@@ -1,0 +1,43 @@
+Part 1:
+Total Entropy: 160.0000
+Mean Entropy: 1.2031
+
+Part 2:
+Total Entropy: 73.5000
+Mean Entropy: 1.7500
+
+Part 3:
+Total Entropy: 222.0000
+Mean Entropy: 1.3984
+
+Part 4:
+Total Entropy: 1368.0000
+Mean Entropy: 0.6680
+
+Part 5:
+Total Entropy: 1392.0000
+Mean Entropy: 0.6797
+
+Part 6:
+Total Entropy: 1320.0000
+Mean Entropy: 0.6445
+
+Part 7:
+Total Entropy: 274.0000
+Mean Entropy: 1.0703
+
+Part 8:
+Total Entropy: 968.0000
+Mean Entropy: 0.6953
+
+Part 9:
+Total Entropy: 1112.0000
+Mean Entropy: 0.5430
+
+Part 10:
+Total Entropy: 1032.0000
+Mean Entropy: 0.5039
+
+==========
+Total Entropy over all 10 parts: 7921.5000
+Mean of Mean Entropy over all 10 parts: 0.9156

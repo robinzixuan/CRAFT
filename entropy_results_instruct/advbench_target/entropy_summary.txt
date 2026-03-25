@@ -1,0 +1,5 @@
+Total tokens analyzed: 8796
+Mean entropy: 3.5373
+Standard deviation: 2.4855
+Unique high entropy tokens: 97
+Unique low entropy tokens: 321

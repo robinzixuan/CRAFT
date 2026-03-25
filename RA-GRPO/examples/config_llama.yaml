@@ -1,0 +1,112 @@
+data:
+  train_files: chuhac/R2D-R1@train
+  val_files: NWULIST/R2D-R1-test@test
+  prompt_key: input
+  answer_key: output
+  image_key: images
+  video_key: videos
+  image_dir: null
+  video_fps: 2.0
+  max_prompt_length: 1024
+  max_response_length: 2048
+  rollout_batch_size: 32
+  mini_rollout_batch_size: null
+  val_batch_size: 32
+  format_prompt: ./examples/format_prompt/r1v.jinja
+  override_chat_template: null
+  shuffle: true
+  seed: 238
+  min_pixels: 262144
+  max_pixels: 4194304
+  filter_overlong_prompts: true
+
+algorithm:
+  adv_estimator: grpo
+  disable_kl: false
+  use_kl_loss: true
+  kl_penalty: low_var_kl
+  kl_coef: 1.0e-2
+  online_filtering: false
+  filter_key: overall
+  filter_low: 0.01
+  filter_high: 0.99
+
+worker:
+  actor:
+    global_batch_size: 32
+    micro_batch_size_per_device_for_update: 4
+    micro_batch_size_per_device_for_experience: 4
+    max_grad_norm: 1.0
+    padding_free: false
+    dynamic_batching: false
+    ulysses_size: 1
+    model:
+      model_path: deepseek-ai/DeepSeek-R1-Distill-Llama-8B
+      enable_gradient_checkpointing: true
+      trust_remote_code: false
+      freeze_vision_tower: false
+    optim:
+      lr: 1.0e-6
+      weight_decay: 1.0e-2
+      strategy: adamw
+      lr_warmup_ratio: 0.0
+    fsdp:
+      enable_full_shard: true
+      enable_cpu_offload: false
+      enable_rank0_init: true
+    offload:
+      offload_params: false
+      offload_optimizer: false
+
+  rollout:
+    n: 3
+    temperature: 0.6
+    top_p: 0.95
+    limit_images: 0
+    gpu_memory_utilization: 0.6
+    enforce_eager: true
+    enable_chunked_prefill: false
+    tensor_parallel_size: 1
+    disable_tqdm: false
+    val_override_config:
+      temperature: 0.6
+      top_p: 0.95
+      n: 1
+
+  ref:
+    fsdp:
+      enable_full_shard: true
+      enable_cpu_offload: false
+      enable_rank0_init: true
+    offload:
+      offload_params: false
+
+  reward:
+    reward_type: batch
+    reward_function: ./examples/reward_function/reasoning-trace.py:compute_score
+    projection_ckpt_path: /projects/p32013/neurons/RA-GRPO/outputs/projection_head.pt
+    safety_ckpt_path: /projects/p32013/neurons/RA-GRPO/outputs/safety_head.pt
+    projection_dim: 512
+    model_path: deepseek-ai/DeepSeek-R1-Distill-Llama-8B
+    num_gpus: 1
+    gpu_memory_utilization: 0.6
+
+trainer:
+  total_epochs: 8
+  max_steps: null
+  project_name: easy_r1
+  experiment_name: llama_think_safety
+  logger: ["file", "wandb"]
+  nnodes: 1
+  n_gpus_per_node: 4
+  max_try_make_batch: 20
+  val_freq: 5
+  val_before_train: true
+  val_only: false
+  val_generations_to_log: 3
+  save_freq: 1
+  save_limit: 6
+  save_model_only: false
+  save_checkpoint_path: /scratch/hlv8980/llama_think_safety_3
+  load_checkpoint_path: null
+  find_last_checkpoint: true

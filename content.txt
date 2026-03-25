@@ -1,0 +1,76 @@
+To solve this problem, we need to count the number of integers between two given numeric strings `num1` and `num2` (inclusive) that have a digit sum within a specified range `[min_sum, max_sum]`. Given the constraints that the input strings can be very large, a brute-force approach is infeasible. Instead, we use a dynamic programming approach known as digit DP to efficiently count valid numbers.
+
+### Approach
+1. **Digit Dynamic Programming (Digit DP)**: This technique is used to count numbers with specific properties in a range by building numbers digit by digit while keeping track of constraints.
+2. **Subtract One from a Numeric String**: A helper function is used to subtract one from a numeric string, which is necessary to compute the count of numbers from 0 to `num1 - 1`.
+3. **Modulo Arithmetic**: Since the result can be large, all operations are performed modulo $10^9 + 7$.
+
+### Solution Code
+```python
+from collections import defaultdict
+
+class Solution:
+    def count(self, num1: str, num2: str, min_sum: int, max_sum: int) -> int:
+        MOD = 10**9 + 7
+
+        def subtract_one(s: str) -> str:
+            digits = list(s)
+            i = len(digits) - 1
+            while i >= 0 and digits[i] == '0':
+                digits[i] = '9'
+                i -= 1
+            if i < 0:
+                return "-1"
+            digits[i] = str(int(digits[i]) - 1)
+            result = ''.join(digits)
+            if result[0] == '0':
+                new_result = result.lstrip('0')
+                if new_result == '':
+                    return '0'
+                return new_result
+            else:
+                return result
+
+        def f(s: str, min_sum: int, max_sum: int) -> int:
+            if s == "-1":
+                return 0
+            digits = [int(c) for c in s]
+            n = len(digits)
+            prev_dp = [defaultdict(int) for _ in range(2)]
+            prev_dp[1][0] = 1  # tight=1, sum_so_far=0, count=1
+
+            for i in range(n):
+                current_digit = digits[i]
+                next_dp = [defaultdict(int) for _ in range(2)]
+                for tight in [0, 1]:
+                    for sum_so_far in prev_dp[tight]:
+                        cnt = prev_dp[tight][sum_so_far]
+                        if tight:
+                            max_d = current_digit
+                        else:
+                            max_d = 9
+                        for d in range(0, max_d + 1):
+                            new_tight = 1 if (tight and (d == max_d)) else 0
+                            new_sum = sum_so_far + d
+                            next_dp[new_tight][new_sum] = (next_dp[new_tight][new_sum] + cnt) % MOD
+                prev_dp = next_dp
+
+            total = 0
+            for tight in [0, 1]:
+                for sum_so_far in prev_dp[tight]:
+                    if min_sum <= sum_so_far <= max_sum:
+                        total = (total + prev_dp[tight][sum_so_far]) % MOD
+            return total
+
+        num1_minus_1 = subtract_one(num1)
+        upper = f(num2, min_sum, max_sum)
+        lower = f(num1_minus_1, min_sum, max_sum)
+        return (upper - lower + MOD) % MOD
+```
+
+### Explanation
+1. **Digit DP Function `f(s, min_sum, max_sum)`**: This function calculates the count of numbers from 0 to the numeric string `s` (inclusive) that have a digit sum within the range `[min_sum, max_sum]`. It uses dynamic programming with memoization to track the number of valid ways to form numbers digit by digit while respecting the constraints.
+2. **Subtract One Helper Function**: This function handles the decrement of a numeric string, accounting for leading zeros and ensuring correct numeric string formatting.
+3. **Main Count Function**: This function computes the result by calculating the count of valid numbers up to `num2` and subtracting the count of valid numbers up to `num1 - 1`, using the helper functions and digit DP approach.
+
+This approach efficiently handles large numeric strings and ensures the result is computed modulo $10^9 + 7$ to handle large numbers.
