@@ -55,8 +55,8 @@ worker:
       enable_cpu_offload: false
       enable_rank0_init: true
     offload:
-      offload_params: false  
-      offload_optimizer: false  # 4 卡不需要 offload
+      offload_params: false
+      offload_optimizer: true  # keep optimizer on CPU to avoid OOM during load_checkpoint
 
   rollout:
     n: 3
@@ -88,7 +88,7 @@ worker:
     safety_ckpt_path: /projects/p32013/neurons/RA-GRPO-old/outputs/safety_head.pt
     projection_dim: 512
     model_path: Qwen/Qwen3-4B-Thinking-2507
-    num_gpus: 4  # 只需要 1 个 GPU 用于 reward 计算
+    num_gpus: 0  # reward is CPU-only (latent computed in actor)
     
 
 trainer:
@@ -106,8 +106,8 @@ trainer:
   val_generations_to_log: 3
   save_freq: 1  # -1 to disable
   save_limit: 3  # -1 to disable
-  save_model_only: false
+  save_model_only: true  # optimizer save (~32 GB CPU RAM spike) causes OOM; model-only is ~8 GB total
   save_checkpoint_path: /scratch/hlv8980/qwen3_4b_think_safety_vllm
   load_checkpoint_path: null
-  find_last_checkpoint: false
+  find_last_checkpoint: true
 

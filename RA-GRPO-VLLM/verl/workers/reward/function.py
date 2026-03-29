@@ -53,9 +53,20 @@ class RewardInput(TypedDict):
     config: RewardConfig
     
 
+def _sanitize_text(text: str) -> str:
+    """Remove null bytes and non-printable control chars that break JSON serialization."""
+    # Remove null bytes and ASCII control chars (except tab/newline/CR which are valid JSON)
+    return "".join(c for c in text if c == "\t" or c == "\n" or c == "\r" or (ord(c) >= 32 and c != "\x7f"))
+
+
 def evaluate_generation_strongreject(question, generation, max_retries=8):
-    """Call autograde_response with exponential backoff on rate limit (429) errors."""
+    """Call autograde_response with exponential backoff on rate limit (429) errors.
+    Returns 0.0 for bad-request errors (e.g. unparseable text with control chars).
+    """
     import openai
+    import re
+    question = _sanitize_text(question)
+    generation = _sanitize_text(generation)
     delay = 1.0
     for attempt in range(max_retries):
         try:
@@ -66,14 +77,16 @@ def evaluate_generation_strongreject(question, generation, max_retries=8):
         except openai.RateLimitError as e:
             if attempt == max_retries - 1:
                 raise
-            # parse retry-after hint from error message if available (e.g. "try again in 312ms")
             wait = delay + random.uniform(0, 0.5)
-            import re
             m = re.search(r"try again in (\d+(?:\.\d+)?)s", str(e))
             if m:
                 wait = max(wait, float(m.group(1)) + random.uniform(0, 0.5))
             time.sleep(wait)
             delay = min(delay * 2, 60.0)
+        except openai.BadRequestError:
+            # Unrecoverable bad input (e.g. residual control chars after sanitization).
+            # Return neutral score so training continues.
+            return 0.0
 
 class RewardScore(TypedDict):
     overall: float

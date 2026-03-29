@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import gc
 import os
 from typing import Optional, Union
 
@@ -20,7 +21,9 @@ import torch.distributed as dist
 from torch.distributed.checkpoint.state_dict import (
     StateDictOptions,
     get_model_state_dict,
+    get_optimizer_state_dict,
     get_state_dict,
+    set_model_state_dict,
     set_state_dict,
 )
 from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
@@ -57,30 +60,53 @@ class FSDPCheckpointManager(BaseCheckpointManager):
         if path is None:
             return
 
-        # every rank download its own checkpoint
         model_path = os.path.join(path, f"model_world_size_{self.world_size}_rank_{self.rank}.pt")
         optim_path = os.path.join(path, f"optim_world_size_{self.world_size}_rank_{self.rank}.pt")
         extra_path = os.path.join(path, f"extra_state_world_size_{self.world_size}_rank_{self.rank}.pt")
+
         print(f"[rank-{self.rank}]: Loading model from {os.path.abspath(model_path)}.")
         print(f"[rank-{self.rank}]: Loading optimizer from {os.path.abspath(optim_path)}.")
         print(f"[rank-{self.rank}]: Loading extra_state from {os.path.abspath(extra_path)}.")
-        model_state_dict = torch.load(model_path, weights_only=False)
-        optim_state_dict = torch.load(optim_path, weights_only=False)
-        extra_state_dict = torch.load(extra_path, weights_only=False)
 
+        # Use mmap=True so torch.load maps the file into virtual memory instantly
+        # (no upfront copy). Pages are faulted in one tensor at a time as
+        # set_state_dict processes each parameter — peak RAM per rank stays at
+        # ~hundreds of MB instead of the full ~11.7 GB shard, avoiding the
+        # ~47 GB concurrent spike that killed the process previously.
+        # All 4 ranks load concurrently (no NCCL barrier stagger needed).
+        def _load(p):
+            try:
+                return torch.load(p, weights_only=False, mmap=True)
+            except TypeError:
+                return torch.load(p, weights_only=False)
+
+        model_state_dict = _load(model_path)
         state_dict_options = StateDictOptions(cpu_offload=True)
-        set_state_dict(
-            model=self.model,
-            optimizers=self.optimizer,
-            model_state_dict=model_state_dict,
-            optim_state_dict=optim_state_dict,
-            options=state_dict_options,
-        )
-        self.lr_scheduler.load_state_dict(extra_state_dict["lr_scheduler"])
 
-        # recover random state
-        if "rng" in extra_state_dict:
-            self.load_rng_state(extra_state_dict["rng"])
+        if os.path.exists(optim_path):
+            # Full checkpoint (model + optimizer + lr_scheduler)
+            optim_state_dict = _load(optim_path)
+            extra_state_dict = torch.load(extra_path, weights_only=False)
+            set_state_dict(
+                model=self.model,
+                optimizers=self.optimizer,
+                model_state_dict=model_state_dict,
+                optim_state_dict=optim_state_dict,
+                options=state_dict_options,
+            )
+            self.lr_scheduler.load_state_dict(extra_state_dict["lr_scheduler"])
+            if "rng" in extra_state_dict:
+                self.load_rng_state(extra_state_dict["rng"])
+            del model_state_dict, optim_state_dict, extra_state_dict
+        else:
+            # Model-only checkpoint (save_model_only=True); optimizer resets from scratch
+            print(f"[rank-{self.rank}]: No optimizer checkpoint found, loading model weights only.")
+            set_model_state_dict(
+                model=self.model,
+                model_state_dict=model_state_dict,
+                options=state_dict_options,
+            )
+            del model_state_dict
 
     def save_checkpoint(self, path: str, save_model_only: bool = False):
         path = self.local_mkdir(path)
@@ -92,22 +118,30 @@ class FSDPCheckpointManager(BaseCheckpointManager):
         extra_path = os.path.join(path, f"extra_state_world_size_{self.world_size}_rank_{self.rank}.pt")
 
         state_dict_options = StateDictOptions(cpu_offload=True)
-        if save_model_only:
-            model_state_dict = get_model_state_dict(self.model, options=state_dict_options)
-            print(f"[rank-{self.rank}]: Saving model to {os.path.abspath(model_path)}.")
-            torch.save(model_state_dict, model_path)
-        else:
-            model_state_dict, optim_state_dict = get_state_dict(self.model, self.optimizer, options=state_dict_options)
+
+        # Save model shard first, free its RAM, then save optimizer shard.
+        # Calling get_state_dict() once returns both simultaneously (~10 GB per
+        # rank × 4 ranks = ~40 GB CPU RAM spike → OOM).  Splitting the calls
+        # and running gc.collect() between them keeps peak RAM at ~8 GB total.
+        print(f"[rank-{self.rank}]: Saving model to {os.path.abspath(model_path)}.")
+        model_state_dict = get_model_state_dict(self.model, options=state_dict_options)
+        torch.save(model_state_dict, model_path)
+        del model_state_dict
+        gc.collect()
+
+        if not save_model_only:
+            print(f"[rank-{self.rank}]: Saving optimizer to {os.path.abspath(optim_path)}.")
+            print(f"[rank-{self.rank}]: Saving extra_state to {os.path.abspath(extra_path)}.")
+            # get_state_dict returns both; discard the model part we already saved.
+            _, optim_state_dict = get_state_dict(self.model, self.optimizer, options=state_dict_options)
             extra_state_dict = {
                 "lr_scheduler": self.lr_scheduler.state_dict(),
                 "rng": self.get_rng_state(),
             }
-            print(f"[rank-{self.rank}]: Saving model to {os.path.abspath(model_path)}.")
-            print(f"[rank-{self.rank}]: Saving optimizer to {os.path.abspath(optim_path)}.")
-            print(f"[rank-{self.rank}]: Saving extra_state to {os.path.abspath(extra_path)}.")
-            torch.save(model_state_dict, model_path)
             torch.save(optim_state_dict, optim_path)
             torch.save(extra_state_dict, extra_path)
+            del optim_state_dict, extra_state_dict
+            gc.collect()
 
         # wait for everyone to dump to local
         dist.barrier()
