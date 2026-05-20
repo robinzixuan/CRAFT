@@ -10,7 +10,7 @@ import torch.nn.functional as F
 import numpy as np
 import json
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from LCA import ProjectionHead, SafetyHead, pool
+from lca import ProjectionHead, SafetyHead, pool
 import argparse
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 import matplotlib.pyplot as plt
