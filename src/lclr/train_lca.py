@@ -29,12 +29,19 @@ def load_and_preprocess_data(data_path, test_size=0.2, random_state=42):
     """
     print(f"\n📂 DATA LOADING AND PREPROCESSING")
     print(f"   - Loading data from {data_path}...")
-    
-    # Load the JSON data
-    with open(data_path, 'r') as f:
-        data = json.load(f)
-    
-    print(f"   - Loaded {len(data)} examples from JSON file")
+
+    # Load the data: prefer HF dataset id if it isn't a local file path.
+    if os.path.isfile(data_path):
+        print(f"   - Loading local JSON file...")
+        with open(data_path, 'r') as f:
+            data = json.load(f)
+    else:
+        print(f"   - Path is not a local file; trying as HuggingFace dataset id...")
+        from datasets import load_dataset
+        ds = load_dataset(data_path, split="train")
+        data = [dict(row) for row in ds]
+
+    print(f"   - Loaded {len(data)} examples")
     
     # Filter and preprocess data
     print(f"   - Filtering and preprocessing data...")
@@ -203,7 +210,7 @@ def main():
     parser = argparse.ArgumentParser(description='Train LCA model for safety alignment')
     parser.add_argument('--data_path', type=str, default='dataset/data.json',
                        help='Path to the dataset JSON file')
-    parser.add_argument('--model_name', type=str, default='microsoft/DialoGPT-medium',
+    parser.add_argument('--model_name', type=str, default='Qwen/Qwen3-4B-Thinking-2507',
                        help='Base model name for training')
     parser.add_argument('--verifier_path', type=str, default=None,
                        help='Optional safety verifier model path')
@@ -213,7 +220,7 @@ def main():
                        help='Batch size for training')
     parser.add_argument('--test_size', type=float, default=0.2,
                        help='Fraction of data for testing')
-    parser.add_argument('--output_dir', type=str, default='outputs_llama',
+    parser.add_argument('--output_dir', type=str, default='./outputs/lclr',
                        help='Directory to save trained models')
     parser.add_argument('--use_wandb', action='store_true',
                        help='Enable Weights & Biases logging')
