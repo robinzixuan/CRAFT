@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+title: "CRAFT: Contrastive Reasoning Alignment — Reinforcement Learning from Hidden Representations"
+message: "If you use this software, please cite the ICML 2026 paper below."
+authors:
+  - family-names: Luo
+    given-names: Haozheng
+    email: hluo@u.northwestern.edu
+    affiliation: Northwestern University
+  - family-names: Wang
+    given-names: Yimin
+    affiliation: University of Michigan
+  - family-names: Yu
+    given-names: Jiahao
+    affiliation: Northwestern University
+  - family-names: Wang
+    given-names: Binghui
+    affiliation: Illinois Institute of Technology
+  - family-names: Chen
+    given-names: Yan
+    affiliation: Northwestern University
+preferred-citation:
+  type: conference-paper
+  title: "Contrastive Reasoning Alignment: Reinforcement Learning from Hidden Representations"
+  authors:
+    - family-names: Luo
+      given-names: Haozheng
+    - family-names: Wang
+      given-names: Yimin
+    - family-names: Yu
+      given-names: Jiahao
+    - family-names: Wang
+      given-names: Binghui
+    - family-names: Chen
+      given-names: Yan
+  conference:
+    name: "Proceedings of the 43rd International Conference on Machine Learning (ICML 2026)"
+  year: 2026
+license: Apache-2.0
+repository-code: "https://github.com/robinzixuan/CRAFT"

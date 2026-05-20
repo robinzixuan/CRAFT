@@ -1,0 +1,13 @@
+CRAFT — Contrastive Reasoning Alignment
+Copyright 2026 The CRAFT Authors.
+
+This product includes software developed by:
+  - The EasyR1 contributors (https://github.com/hiyouga/EasyR1), Apache-2.0.
+  - Bytedance Ltd., veRL (https://github.com/volcengine/verl), Apache-2.0.
+  - The ReasoningShield authors (https://github.com/changyi7231/ReasoningShield).
+  - The IPO authors (arXiv:2509.24393).
+
+See LICENSE for the Apache 2.0 license text.
+
+The StrongReject evaluator (eval/strongreject/) carries its own MIT license;
+see eval/strongreject/LICENSE.
