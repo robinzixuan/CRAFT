@@ -25,7 +25,8 @@ dist/
 *.swp
 .DS_Store
 
-# Local environment
+# Local environment / credentials (never commit)
+config.yaml
 .env
 .env.local
 .venv/
