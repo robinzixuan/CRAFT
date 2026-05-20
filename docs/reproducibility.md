@@ -58,7 +58,7 @@ bash src/r2l/examples/scripts/train_<MODEL>.sh
 python src/r2l/scripts/model_merger.py --local_dir ./checkpoints/<EXP>/global_step_<N>/actor
 
 # 3. Evaluate
-bash eval/jailbreakbench/jbb_qwen.sh ./checkpoints/<EXP>/global_step_<N>/actor
+bash eval/jailbreakbench/jbb_qwen.sh  # edit MODEL_PATH in jbb_qwen.py first
 python eval/strongreject/StrongReject.py --responses <output_from_jbb>.jsonl
 ```
 
@@ -71,12 +71,18 @@ Run each benchmark harness on the merged CRAFT checkpoint; see
 
 ```bash
 bash src/r2l/examples/scripts/train_ablation.sh
-# Pass extra overrides per ablation row:
-# --reward_function reasoning_trace_ablation.py:compute_score_no_cons
-# --reward_function reasoning_trace_ablation.py:compute_score_no_lat
-# --reward_function reasoning_trace_ablation.py:compute_score_no_txt
-# --reward_function reasoning_trace_ablation.py:compute_score_no_lclr
 ```
+
+To toggle individual reward components, edit
+`src/r2l/examples/configs/config_ablation.yaml` and set the corresponding
+weight to 0:
+
+| Ablation row | Edit in config_ablation.yaml |
+| --- | --- |
+| no L_cons (consistency) | `worker.reward.w_cons: 0` |
+| no R_ls (latent semantic) | `worker.reward.w_lat: 0` |
+| no R_txt (textual safety) | `worker.reward.w_txt: 0` |
+| no LCLR (random init heads) | use a fresh `projection_head.pt` / `safety_head.pt` |
 
 Then evaluate as in Table 1.
 
