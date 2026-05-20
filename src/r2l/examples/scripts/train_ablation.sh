@@ -65,7 +65,7 @@ $PYTHON_BIN --version
 
 # 4 GPU 配置
 $PYTHON_BIN -m verl.trainer.main \
-    config=examples/config2_ablasion.yaml \
+    config=examples/configs/config_ablation.yaml \
     data.max_response_length=2048 \
     data.max_prompt_length=1024 \
     worker.actor.model.model_path=${MODEL_PATH} \

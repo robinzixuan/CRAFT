@@ -48,7 +48,7 @@ $PYTHON_BIN --version
 
 # 已修改 verl/workers/fsdp_workers.py 使用 sdpa 替代 flash_attention_2
 $PYTHON_BIN -m verl.trainer.main \
-    config=examples/config2.yaml \
+    config=examples/configs/config_qwen3_4b_thinking.yaml \
     data.max_response_length=2048 \
     data.max_prompt_length=1024 \
     worker.actor.model.model_path=${MODEL_PATH} \
