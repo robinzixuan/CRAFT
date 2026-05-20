@@ -1,6 +1,6 @@
 #!/bin/bash
-# 还原环境适配补丁（当 flash_attn 可用时使用）
-# 用法: source patches/revert_patches.sh
+# Revert environment-compatibility patches (use when flash_attn is available)
+# Usage: source patches/revert_patches.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
