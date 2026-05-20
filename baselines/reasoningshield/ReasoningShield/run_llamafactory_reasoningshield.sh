@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # 基础路径
-ROOT_DIR="/projects/p32013/neurons/RA-GRPO"
+ROOT_DIR="."
 DATASET_DIR="${ROOT_DIR}/baseline/reasoningshield/ReasoningShield/reasoningshield_Dataset/reasoningshield-train"
 
 # 模型与输出目录（如模型名不同，可修改 MODEL_NAME）

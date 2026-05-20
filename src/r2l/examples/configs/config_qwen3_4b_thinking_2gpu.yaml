@@ -84,8 +84,8 @@ worker:
   reward:
     reward_type: batch
     reward_function: ./examples/reward_function/reasoning_trace.py:compute_score
-    projection_ckpt_path: /projects/p32013/neurons/RA-GRPO-old/outputs/projection_head.pt
-    safety_ckpt_path: /projects/p32013/neurons/RA-GRPO-old/outputs/safety_head.pt
+    projection_ckpt_path: ./outputs/lclr/projection_head.pt
+    safety_ckpt_path: ./outputs/lclr/safety_head.pt
     projection_dim: 512
     model_path: Qwen/Qwen3-4B-Thinking-2507
     num_gpus: 1  # 只需要 1 个 GPU 用于 reward 计算
@@ -107,7 +107,7 @@ trainer:
   save_freq: 1  # -1 to disable
   save_limit: 3  # -1 to disable
   save_model_only: false
-  save_checkpoint_path: /scratch/hlv8980/qwen3_4b_think_safety_2_2gpu
+  save_checkpoint_path: ./checkpoints/qwen3_4b_thinking_craft_2gpu
   load_checkpoint_path: null
   find_last_checkpoint: true
 

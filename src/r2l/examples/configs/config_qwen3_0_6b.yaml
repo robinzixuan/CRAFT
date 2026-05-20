@@ -84,8 +84,8 @@ worker:
   reward:
     reward_type: batch
     reward_function: ./examples/reward_function/reasoning_trace.py:compute_score
-    projection_ckpt_path: /projects/p32013/neurons/RA-GRPO-old/outputs/qwen/projection_head.pt
-    safety_ckpt_path: /projects/p32013/neurons/RA-GRPO-old/outputs/qwen/safety_head.pt
+    projection_ckpt_path: ./outputs/lclr/qwen/projection_head.pt
+    safety_ckpt_path: ./outputs/lclr/qwen/safety_head.pt
     projection_dim: 512
     model_path: Qwen/Qwen3-0.6B
     num_gpus: 2  # no GPU needed: h_mean is computed by actor, reward only runs tiny CPU heads
@@ -106,6 +106,6 @@ trainer:
   save_freq: 1
   save_limit: 6
   save_model_only: false
-  save_checkpoint_path: /scratch/hlv8980/qwen3_0.6b_think_safety_2
+  save_checkpoint_path: ./checkpoints/qwen3_0_6b_craft
   load_checkpoint_path: null
   find_last_checkpoint: true

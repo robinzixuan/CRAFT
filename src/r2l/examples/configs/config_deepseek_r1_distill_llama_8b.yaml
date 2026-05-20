@@ -84,8 +84,8 @@ worker:
   reward:
     reward_type: batch
     reward_function: ./examples/reward_function/reasoning_trace.py:compute_score
-    projection_ckpt_path: /projects/p32013/neurons/RA-GRPO/outputs/projection_head.pt
-    safety_ckpt_path: /projects/p32013/neurons/RA-GRPO/outputs/safety_head.pt
+    projection_ckpt_path: ./outputs/lclr/projection_head.pt
+    safety_ckpt_path: ./outputs/lclr/safety_head.pt
     projection_dim: 512
     model_path: deepseek-ai/DeepSeek-R1-Distill-Llama-8B
     num_gpus: 1
@@ -107,6 +107,6 @@ trainer:
   save_freq: 1
   save_limit: 6
   save_model_only: false
-  save_checkpoint_path: /scratch/hlv8980/llama_think_safety_3
+  save_checkpoint_path: ./checkpoints/llama_think_safety
   load_checkpoint_path: null
   find_last_checkpoint: true

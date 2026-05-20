@@ -5,7 +5,7 @@ set -euo pipefail
 # 论文参数：Table 11 - Training Details of ReasoningShield
 
 # 基础路径
-ROOT_DIR="/projects/p32013/neurons/RA-GRPO"
+ROOT_DIR="."
 DATASET_DIR="${ROOT_DIR}/baseline/reasoningshield/ReasoningShield/reasoningshield_Dataset/reasoningshield-train"
 
 # 模型与输出目录

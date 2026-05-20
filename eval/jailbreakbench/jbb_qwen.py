@@ -15,7 +15,7 @@ from jailbreakbench.classifier import Llama3JailbreakJudge, Llama3RefusalJudge, 
 from jailbreakbench.config import TEMPERATURE, TOP_P, MAX_GENERATION_LENGTH
 
 # 模型路径（可以是本地路径或 HuggingFace 模型 ID）
-MODEL_PATH = "/scratch/hlv8980/llama_think_safety_3/global_step_13/actor/huggingface"  # 可以是本地路径或 HF 模型 ID
+MODEL_PATH = "./checkpoints/qwen3_4b_thinking_craft"  # 可以是本地路径或 HF 模型 ID
 
 # API key (用于 judge 评估)
 API_KEY = os.environ.get("TOGETHER_API_KEY") or os.environ.get("OPENAI_API_KEY")

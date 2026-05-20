@@ -7,12 +7,14 @@ export PYTHONPATH="$PROJECT_ROOT:${PYTHONPATH:-}"
 cd "$PROJECT_ROOT"
 
 export OPENAI_API_KEY="${OPENAI_API_KEY:?set this to your OpenAI key for GPT-based eval}"
-export HF_HOME="/projects/p32013/.cache/"
-export TOGETHER_API_KEY=tgp_v1_8Gfeb1DZcPh6V3YqJlrm_N5xH1wXhogbDm1QRAMFVfo
-# 只加载 CUDA 12（vLLM 需要 libcudart.so.12）
-module load cuda/12.4.0-gcc-12.4.0
+export HF_HOME="${HF_HOME:-$HOME/.cache/huggingface}/"
+export TOGETHER_API_KEY="${TOGETHER_API_KEY:?set this to your Together API key}"
+# Cluster setup (uncomment / adapt for your environment):
+# module load cuda/12.4 cudnn/8.9.7-cuda-12 vllm/0.10.1
+# export CUDA_HOME=/path/to/cuda
 
-PYTHON_BIN="/projects/p32013/conda_envs/jailbreakbench/bin/python3"
+PYTHON_BIN="${CONDA_PREFIX:+${CONDA_PREFIX}/bin/python3}"
+PYTHON_BIN="${PYTHON_BIN:-python3}"
 
 echo "Using Python: $PYTHON_BIN"
 $PYTHON_BIN --version

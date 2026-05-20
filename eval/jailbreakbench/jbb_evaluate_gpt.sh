@@ -1,13 +1,14 @@
 #!/bin/bash
 set -x
 
-cd /projects/p32013/neurons/RA-GRPO
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
 
 # 设置 OpenAI API key（使用你在 JBB_qwen.sh 中设置的 key）
 export OPENAI_API_KEY="${OPENAI_API_KEY:?set this to your OpenAI key for GPT-based eval}"
 
-# 使用 jailbreakbench conda 环境
-PYTHON_BIN="/projects/p32013/conda_envs/jailbreakbench/bin/python3"
+PYTHON_BIN="${CONDA_PREFIX:+${CONDA_PREFIX}/bin/python3}"
+PYTHON_BIN="${PYTHON_BIN:-python3}"
 
 echo "Using Python: $PYTHON_BIN"
 $PYTHON_BIN --version

@@ -7,15 +7,10 @@ export PYTHONPATH="$PROJECT_ROOT:${PYTHONPATH:-}"
 cd "$PROJECT_ROOT"
 
 export OPENAI_API_KEY="${OPENAI_API_KEY:?set this to your OpenAI key for GPT-based eval}"
-module load cuda/12.4.0-gcc-12.4.0
-module load gcc/12.4.0-gcc-8.5.0
-module load cudnn/8.9.7.29-12-cuda-gcc-12.4.0
-export CUDA_HOME=/software/cuda/cuda-12.1.0
-export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
-nvcc --version
-module load glibc/2.28-gcc-12.4.0
-module load vllm/0.10.1-gpt-oss
-export HF_HOME="/projects/p32013/.cache/"
+# Cluster setup (uncomment / adapt for your environment):
+# module load cuda/12.4 cudnn/8.9.7-cuda-12 vllm/0.10.1
+# export CUDA_HOME=/path/to/cuda
+export HF_HOME="${HF_HOME:-$HOME/.cache/huggingface}/"
 # Set up environment variables for wandb
 export WANDB_PROJECT="lca-safety-grpo"
 export WANDB_ENABLED="true"
@@ -33,9 +28,8 @@ MODEL_PATH=Qwen/Qwen3-0.6B
 
 if [ -n "$CONDA_PREFIX" ] && [ -f "${CONDA_PREFIX}/bin/python3" ]; then
     PYTHON_BIN="${CONDA_PREFIX}/bin/python3"
-elif [ -f "/projects/p32013/conda_envs/vllm/bin/python3" ]; then
-    PYTHON_BIN="/projects/p32013/conda_envs/vllm/bin/python3"
-    export PATH="/projects/p32013/conda_envs/vllm/bin:$PATH"
+elif command -v python3 &>/dev/null; then
+    PYTHON_BIN="python3"
 else
     echo "Warning: Using system python3, codetiming may not be available"
     PYTHON_BIN="python3"

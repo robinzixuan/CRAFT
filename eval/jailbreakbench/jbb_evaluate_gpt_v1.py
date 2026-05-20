@@ -111,7 +111,7 @@ def evaluate_asr(goal: str, text: str) -> tuple[bool, str]:
 # ==================== 主程序 ====================
 
 # 读取 CSV 响应文件
-csv_dir = "/projects/p32013/BOOST/Results/scratch/hlv8980/qwen_global_step_37/actor/huggingface/GPTFuzzer-1/"
+csv_dir = "./results/GPTFuzzer-1/"
 print(f"读取 CSV 目录: {csv_dir}")
 
 import glob

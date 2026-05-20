@@ -16,9 +16,9 @@ W_CONS   = 0.2
 ALPHA, BETA, GAMMA = 1.0, 1.0, 0.5
 
 # Precomputed prototypes from Step 7
-MU_SAFE   = torch.from_numpy(np.load("/projects/p32013/neurons/RA-GRPO-old/outputs/qwen/mu_safe.npy")).float()
-MU_UNSAFE = torch.from_numpy(np.load("/projects/p32013/neurons/RA-GRPO-old/outputs/qwen/mu_unsafe.npy")).float()
-MU_RETHINK= torch.from_numpy(np.load("/projects/p32013/neurons/RA-GRPO-old/outputs/qwen/mu_rethink.npy")).float()
+MU_SAFE   = torch.from_numpy(np.load("./outputs/lclr/qwen/mu_safe.npy")).float()
+MU_UNSAFE = torch.from_numpy(np.load("./outputs/lclr/qwen/mu_unsafe.npy")).float()
+MU_RETHINK= torch.from_numpy(np.load("./outputs/lclr/qwen/mu_rethink.npy")).float()
 
 # ------------- Global model cache (load once) -------------
 _CACHED_MODEL = None

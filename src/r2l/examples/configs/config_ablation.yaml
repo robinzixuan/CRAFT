@@ -84,8 +84,8 @@ worker:
   reward:
     reward_type: batch
     reward_function: ./examples/reward_function/reasoning_trace_ablation.py:compute_score
-    projection_ckpt_path: /projects/p32013/neurons/RA-GRPO-old/outputs/projection_head.pt
-    safety_ckpt_path: /projects/p32013/neurons/RA-GRPO-old/outputs/safety_head.pt
+    projection_ckpt_path: ./outputs/lclr/projection_head.pt
+    safety_ckpt_path: ./outputs/lclr/safety_head.pt
     projection_dim: 512
     model_path: Qwen/Qwen3-4B-Thinking-2507
     num_gpus: 1
