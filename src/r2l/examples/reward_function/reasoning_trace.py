@@ -15,10 +15,9 @@ W_CONS   = 0.2
 # LAMBDA_KL = 0.02
 ALPHA, BETA, GAMMA = 1.0, 1.0, 0.5
 
-# Precomputed prototypes from contrastive learning
-# MU_SAFE   = torch.from_numpy(np.load("./outputs/lclr/mu_safe.npy")).float()
-# MU_UNSAFE = torch.from_numpy(np.load("./outputs/lclr/mu_unsafe.npy")).float()
-# MU_RETHINK= torch.from_numpy(np.load("./outputs/lclr/mu_rethink.npy")).float()
+# Prototype paths default to ./outputs/lclr/ (see src/lclr/train_lca.py).
+# Override via config: worker.reward.projection_ckpt_path / safety_ckpt_path
+# (the directory containing these two .pt files is the same as mu_*.npy).
 
 # ------------- Global head cache (load once, ~2MB) -------------
 _CACHED_PROJECTION_HEAD = None
