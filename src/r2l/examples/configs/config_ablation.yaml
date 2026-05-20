@@ -9,7 +9,7 @@ data:
   video_fps: 2.0
   max_prompt_length: 1024
   max_response_length: 2048
-  rollout_batch_size: 2    # 与 global_batch_size 匹配
+  rollout_batch_size: 2    # matches global_batch_size
   mini_rollout_batch_size: null
   val_batch_size: 1
   format_prompt: ./examples/format_prompt/r1v.jinja
@@ -33,7 +33,7 @@ algorithm:
 
 worker:
   actor:
-    global_batch_size: 2      # 最小 batch
+    global_batch_size: 2      # minimum batch size
     micro_batch_size_per_device_for_update: 1
     micro_batch_size_per_device_for_experience: 1
     max_grad_norm: 1.0
@@ -63,7 +63,7 @@ worker:
     temperature: 0.6
     top_p: 0.95
     limit_images: 0
-    gpu_memory_utilization: 0.5   # H100 80GB 可以更高
+    gpu_memory_utilization: 0.5   # can be increased on H100 80GB
     enforce_eager: true
     enable_chunked_prefill: false
     tensor_parallel_size: 1
@@ -101,7 +101,7 @@ trainer:
   experiment_name: qwen3_4b_think_safety_ablsion
   logger: ["file", "wandb"]
   nnodes: 1
-  n_gpus_per_node: 2  # 4 张 GPU
+  n_gpus_per_node: 2  # 4 GPUs
   max_try_make_batch: 20
   val_freq: -1
   val_before_train: false

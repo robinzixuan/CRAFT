@@ -129,7 +129,7 @@ def calculate_latent(h_mean, config):
 # ------------- EasyR1 entry point -------------
 def compute_score(reward_inputs: list[dict[str, Any]]) -> list[dict[str, float]]:
     """
-    批量计算 reward，一次性做模型前向推理，避免逐样本推理的性能开销。
+    Compute rewards in batch, performing a single model forward pass to avoid per-sample inference overhead.
     """
     if not isinstance(reward_inputs, list):
         raise ValueError("Please call with reward_type=batch in EasyR1.")
@@ -144,9 +144,9 @@ def compute_score(reward_inputs: list[dict[str, Any]]) -> list[dict[str, float]]
     for i, r in enumerate(reward_inputs):
         p_text = torch.tensor(r.get("p_text", 0.0), dtype=torch.float32)
 
-        # 取第 i 个样本的特征
+        # Extract features for the i-th sample
         z_i = z[i].float()                   # [512]
-        p_latent_i = p_latent[i].float()[0]  # 取 safe 类概率
+        p_latent_i = p_latent[i].float()[0]  # safe class probability
 
         R_lat = latent_reward(z_i)
         R_con = consistency_reward(p_latent_i, p_text)

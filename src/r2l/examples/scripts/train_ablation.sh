@@ -1,17 +1,17 @@
 #!/bin/bash
 set -x
 
-# 清理旧的 Ray 会话
+# Clean up stale Ray session
 unset RAY_ADDRESS
 ray stop --force 2>/dev/null || true
 
 
-# 使用 /tmp 作为 Ray 临时目录（有更多空间）
+# Use /tmp as Ray temporary directory (more space available)
 export RAY_TMPDIR="/tmp/ray_workspace"
 mkdir -p $RAY_TMPDIR
-echo "Ray 日志目录: $RAY_TMPDIR"
+echo "Ray log directory: $RAY_TMPDIR"
 
-# 增加调试日志
+# Enable extra debug logging (uncomment if needed)
 # export RAY_LOG_TO_STDERR=1
 # export VLLM_LOGGING_LEVEL=DEBUG
 
@@ -38,10 +38,10 @@ export VLLM_USE_V1=0
 export VLLM_DISABLE_RAY_INIT=1
 
 
-# 3) 强制 Ray 使用 spawn（避免 fork + CUDA 死锁）
+# 3) Force Ray to use spawn (avoids fork + CUDA deadlock)
 export RAY_FORCE_MULTIPROCESSING_START_METHOD=spawn
 
-# 4) 禁止 placement group（否则必卡）
+# 4) Disable placement group (required to avoid hangs)
 export VLLM_RAY_DISABLE_PLACEMENT_GROUP=1
 
 MODEL_PATH=Qwen/Qwen3-4B-Thinking-2507
@@ -58,7 +58,7 @@ fi
 echo "Using Python: $PYTHON_BIN"
 $PYTHON_BIN --version
 
-# 4 GPU 配置
+# 4 GPU configuration
 $PYTHON_BIN -m verl.trainer.main \
     config=examples/configs/config_ablation.yaml \
     data.max_response_length=2048 \

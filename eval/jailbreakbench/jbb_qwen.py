@@ -1,7 +1,7 @@
 """
-使用 JailbreakBench 数据集对模型进行越狱测试评估
-支持本地 checkpoint 或 HuggingFace 模型 ID
-使用 transformers 加载模型（避免 vLLM 兼容性问题）
+Evaluate a model against the JailbreakBench dataset.
+Supports local checkpoints or HuggingFace model IDs.
+Uses transformers to load the model (avoids vLLM compatibility issues).
 """
 
 import os
@@ -14,30 +14,30 @@ import jailbreakbench as jbb
 from jailbreakbench.classifier import Llama3JailbreakJudge, Llama3RefusalJudge, StringClassifier
 from jailbreakbench.config import TEMPERATURE, TOP_P, MAX_GENERATION_LENGTH
 
-# 模型路径（可以是本地路径或 HuggingFace 模型 ID）
-MODEL_PATH = "./checkpoints/qwen3_4b_thinking_craft"  # 可以是本地路径或 HF 模型 ID
+# Model path (can be a local path or a HuggingFace model ID)
+MODEL_PATH = "./checkpoints/qwen3_4b_thinking_craft"  # local path or HF model ID
 
-# API key (用于 judge 评估)
+# API key (used for judge evaluation)
 API_KEY = os.environ.get("TOGETHER_API_KEY") or os.environ.get("OPENAI_API_KEY")
 
-# 检测是否为 HuggingFace 模型 ID（包含 '/' 且不是本地路径）
+# Detect if this is a HuggingFace model ID (contains '/' and is not a local path)
 is_hf_model_id = "/" in MODEL_PATH and not os.path.exists(MODEL_PATH)
 
-# 简单校验：如果是本地路径，检查文件是否存在
+# Basic validation: if it's a local path, check that required files exist
 if not is_hf_model_id:
     if not os.path.isfile(os.path.join(MODEL_PATH, "config.json")):
-        raise RuntimeError(f"未找到 config.json，请确认 HF 格式目录: {MODEL_PATH}")
+        raise RuntimeError(f"config.json not found; please verify the HF-format directory: {MODEL_PATH}")
     weight_files = []
     for pattern in ("*.safetensors", "pytorch_model*.bin", "model*.safetensors"):
         weight_files.extend(glob.glob(os.path.join(MODEL_PATH, pattern)))
     if not weight_files:
-        raise RuntimeError(f"未找到 HF 权重文件，请将 checkpoint 导出为 HF 格式: {MODEL_PATH}")
+        raise RuntimeError(f"No HF weight files found; please export the checkpoint to HF format: {MODEL_PATH}")
 else:
-    print(f"检测到 HuggingFace 模型 ID: {MODEL_PATH}")
-    print("将自动从 HuggingFace Hub 下载模型文件")
+    print(f"Detected HuggingFace model ID: {MODEL_PATH}")
+    print("Model files will be downloaded automatically from HuggingFace Hub")
 
-# 使用 transformers 加载本地模型
-print(f"正在加载模型: {MODEL_PATH}")
+# Load model with transformers
+print(f"Loading model: {MODEL_PATH}")
 tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, trust_remote_code=True)
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_PATH,
@@ -47,23 +47,23 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 model.eval()
 
-# 加载 chat_template（如果 tokenizer 没有）
+# Load chat_template if the tokenizer does not have one
 if tokenizer.chat_template is None and not is_hf_model_id:
     template_path = os.path.join(MODEL_PATH, "chat_template.jinja")
     if os.path.isfile(template_path):
         with open(template_path, "r", encoding="utf-8") as f:
             tokenizer.chat_template = f.read()
 
-# 加载 JailbreakBench 数据集
+# Load JailbreakBench dataset
 dataset = jbb.read_dataset()
 goals = dataset.goals
 behaviors = dataset.behaviors
 
 def query_model(prompts: list[str], batch_size: int = 4) -> list[str]:
-    """使用 transformers 查询模型"""
+    """Query the model using transformers."""
     responses = []
     
-    for i in tqdm(range(0, len(prompts), batch_size), desc="生成中"):
+    for i in tqdm(range(0, len(prompts), batch_size), desc="Generating"):
         batch_prompts = prompts[i:i+batch_size]
         formatted_prompts = []
         
@@ -102,13 +102,13 @@ def query_model(prompts: list[str], batch_size: int = 4) -> list[str]:
     
     return responses
 
-# 批量查询模型
-print(f"开始查询 {len(goals)} 个 prompts...")
+# Query model in batch
+print(f"Starting query for {len(goals)} prompts...")
 responses = query_model(goals)
-print("查询完成!")
+print("Query complete!")
 
-# 先保存模型响应（即使评估失败也能看到结果）
-print("\n=== 保存模型响应 ===")
+# Save model responses first (so results are accessible even if evaluation fails)
+print("\n=== Saving Model Responses ===")
 responses_output_path = "./outputs/eval/jailbreakbench/jbb_reasoningshield_qwen_responses.json"
 os.makedirs(os.path.dirname(responses_output_path), exist_ok=True)
 with open(responses_output_path, "w", encoding="utf-8") as f:
@@ -117,7 +117,7 @@ with open(responses_output_path, "w", encoding="utf-8") as f:
         "total": len(goals),
         "data": [{"behavior": b, "goal": g, "response": r} for b, g, r in zip(behaviors, goals, responses)]
     }, f, ensure_ascii=False, indent=2)
-print(f"模型响应已保存到: {responses_output_path}")
+print(f"Model responses saved to: {responses_output_path}")
 
 # # 评估结果
 # print("\n=== 使用 Llama3 Judge 评估 ===")

@@ -1,6 +1,6 @@
 """
-使用 JailbreakBench 数据集对模型进行越狱测试评估
-使用 transformers 加载模型
+Evaluate a model against the JailbreakBench dataset.
+Uses transformers to load the model.
 """
 
 import os
@@ -11,11 +11,11 @@ from tqdm import tqdm
 import jailbreakbench as jbb
 from jailbreakbench.config import TEMPERATURE, TOP_P, MAX_GENERATION_LENGTH
 
-# 模型名称
+# Model name
 MODEL_NAME = "Qwen/Qwen3-4B-Thinking-2507"
 
-# 使用 transformers 加载模型
-print(f"正在加载模型: {MODEL_NAME}")
+# Load model with transformers
+print(f"Loading model: {MODEL_NAME}")
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_NAME,
@@ -25,16 +25,16 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 model.eval()
 
-# 加载 JailbreakBench 数据集
+# Load JailbreakBench dataset
 dataset = jbb.read_dataset()
 goals = dataset.goals
 behaviors = dataset.behaviors
 
 def query_model(prompts: list[str], batch_size: int = 4) -> list[str]:
-    """使用 transformers 查询模型"""
+    """Query the model using transformers."""
     responses = []
     
-    for i in tqdm(range(0, len(prompts), batch_size), desc="生成中"):
+    for i in tqdm(range(0, len(prompts), batch_size), desc="Generating"):
         batch_prompts = prompts[i:i+batch_size]
         formatted_prompts = []
         
@@ -73,13 +73,13 @@ def query_model(prompts: list[str], batch_size: int = 4) -> list[str]:
     
     return responses
 
-# 查询模型
-print(f"开始查询 {len(goals)} 个 prompts...")
+# Query model
+print(f"Starting query for {len(goals)} prompts...")
 responses = query_model(goals)
-print("查询完成!")
+print("Query complete!")
 
-# 保存模型响应
-print("\n=== 保存模型响应 ===")
+# Save model responses
+print("\n=== Saving Model Responses ===")
 responses_output_path = "./outputs/eval/jailbreakbench/jbb_qwen_base_responses.json"
 os.makedirs(os.path.dirname(responses_output_path), exist_ok=True)
 with open(responses_output_path, "w", encoding="utf-8") as f:
@@ -88,4 +88,4 @@ with open(responses_output_path, "w", encoding="utf-8") as f:
         "total": len(goals),
         "data": [{"behavior": b, "goal": g, "response": r} for b, g, r in zip(behaviors, goals, responses)]
     }, f, ensure_ascii=False, indent=2)
-print(f"模型响应已保存到: {responses_output_path}")
+print(f"Model responses saved to: {responses_output_path}")

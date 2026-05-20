@@ -89,11 +89,11 @@ def calculate_latent(input_ids, attention_mask, config):
 
     # ---- Load models only once (cached) ----
     if _CACHED_PROJECTION_HEAD is None:
-        # 先加载 checkpoint，从权重推断输入维度
+        # Load checkpoint first, infer input dimension from weights
         proj_state = torch.load(config.projection_ckpt_path, map_location="cpu")
         head_state = torch.load(config.safety_ckpt_path, map_location="cpu")
-        
-        # 从权重推断 d_in（兼容不同模型）
+
+        # Infer d_in from weights (compatible with different models)
         d_in = proj_state['fn1.weight'].shape[1]
         print(f"📐 Detected projection head input dim: {d_in}")
         
@@ -171,7 +171,7 @@ def compute_score(reward_inputs: list[dict[str, Any]]) -> list[dict[str, float]]
     if not isinstance(reward_inputs, list):
         raise ValueError("Please call with reward_type=batch in EasyR1.")
 
-    # 批量收集所有输入，一次性做模型前向推理
+    # Collect all inputs in batch and perform a single model forward pass
     all_input_ids = torch.stack([r["input_ids"] for r in reward_inputs])
     all_attention_mask = torch.stack([r["attention_mask"] for r in reward_inputs])
     config = reward_inputs[0]["config"]
@@ -186,9 +186,9 @@ def compute_score(reward_inputs: list[dict[str, Any]]) -> list[dict[str, float]]
     for i, r in enumerate(reward_inputs):
         p_text = torch.tensor(r.get("p_text", 0.0), dtype=torch.float32)
 
-        # 取第 i 个样本的特征
+        # Extract features for the i-th sample
         z_i = z[i].float()                   # [512]
-        p_latent_i = p_latent[i].float()[0]  # 取 safe 类概率
+        p_latent_i = p_latent[i].float()[0]  # safe class probability
 
         R_lat = latent_reward(z_i)
         R_con = consistency_reward(p_latent_i, p_text)

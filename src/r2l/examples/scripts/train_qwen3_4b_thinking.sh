@@ -40,7 +40,7 @@ fi
 echo "Using Python: $PYTHON_BIN"
 $PYTHON_BIN --version
 
-# 已修改 verl/workers/fsdp_workers.py 使用 sdpa 替代 flash_attention_2
+# Modified verl/workers/fsdp_workers.py to use sdpa instead of flash_attention_2
 $PYTHON_BIN -m verl.trainer.main \
     config=examples/configs/config_qwen3_4b_thinking.yaml \
     data.max_response_length=2048 \

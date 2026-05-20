@@ -1,6 +1,6 @@
 """
-IPO快速演示
-展示如何使用IPO进行推理干预
+IPO quick demo.
+Shows how to use IPO for reasoning intervention.
 """
 
 import sys
@@ -18,15 +18,15 @@ from ipo.compliance_detector import RuleBasedComplianceDetector
 
 
 def demo_compliance_detection():
-    """演示合规线索检测"""
+    """Demo: compliance cue detection."""
     print("=" * 60)
     print("Demo: Compliance Cue Detection")
     print("=" * 60)
     
-    # 使用基于规则的检测器（不需要API）
+    # Use rule-based detector (no API required)
     detector = RuleBasedComplianceDetector()
     
-    # 示例不安全推理
+    # Example unsafe reasoning
     unsafe_reasoning = """
     Okay, let me think about this. The user is asking about hacking. 
     I'll start by explaining how to use common hacking tools. 
@@ -34,30 +34,30 @@ def demo_compliance_detection():
     Then you can scan for vulnerabilities using nmap.
     """
     
-    print("\n原始推理:")
+    print("\nOriginal reasoning:")
     print(unsafe_reasoning)
-    
-    # 检测合规线索
+
+    # Detect compliance cue
     sentence_idx, compliance_cue = detector.detect(unsafe_reasoning)
-    
+
     if sentence_idx > 0:
-        print(f"\n检测到合规线索 (句子 #{sentence_idx}):")
+        print(f"\nCompliance cue detected (sentence #{sentence_idx}):")
         print(f"  '{compliance_cue}'")
     else:
-        print("\n未检测到合规线索")
+        print("\nNo compliance cue detected")
     
     return compliance_cue
 
 
 def demo_safety_triggers():
-    """演示安全触发器"""
+    """Demo: safety triggers."""
     print("\n" + "=" * 60)
     print("Demo: Safety Triggers")
     print("=" * 60)
     
     generator = SafetyTriggerGenerator()
     
-    print("\n随机采样的安全触发器:")
+    print("\nRandomly sampled safety triggers:")
     triggers = generator.sample(3)
     for i, trigger in enumerate(triggers, 1):
         print(f"  {i}. {trigger}")
@@ -66,7 +66,7 @@ def demo_safety_triggers():
 
 
 def demo_intervention():
-    """演示推理干预"""
+    """Demo: reasoning intervention."""
     print("\n" + "=" * 60)
     print("Demo: Reasoning Intervention")
     print("=" * 60)
@@ -81,25 +81,25 @@ def demo_intervention():
     First, you need to create a convincing sender address.
     """
     
-    print("\n原始不安全推理:")
+    print("\nOriginal unsafe reasoning:")
     print(unsafe_reasoning)
     
-    # 进行干预
+    # Apply intervention
     result = intervention.intervene(unsafe_reasoning)
-    
+
     if result.intervention_applied:
-        print(f"\n检测到合规线索: '{result.compliance_cue}'")
-        print(f"\n使用的安全触发器: '{result.safety_trigger}'")
-        print("\n干预后的安全推理:")
+        print(f"\nCompliance cue detected: '{result.compliance_cue}'")
+        print(f"\nSafety trigger used: '{result.safety_trigger}'")
+        print("\nSafe reasoning after intervention:")
         print(result.intervened_reasoning)
     else:
-        print("\n无需干预，推理已经是安全的")
+        print("\nNo intervention needed; reasoning is already safe")
     
     return result
 
 
 def demo_data_building():
-    """演示IPO数据构建"""
+    """Demo: IPO data building."""
     print("\n" + "=" * 60)
     print("Demo: IPO Data Building")
     print("=" * 60)
@@ -125,11 +125,11 @@ def demo_data_building():
         show_progress=False,
     )
     
-    print(f"\n从 {len(samples)} 个样本构建了 {len(ipo_samples)} 个IPO训练样本")
-    
+    print(f"\nBuilt {len(ipo_samples)} IPO training samples from {len(samples)} input samples")
+
     if ipo_samples:
         sample = ipo_samples[0]
-        print("\n示例IPO样本:")
+        print("\nExample IPO sample:")
         print(f"  Prompt: {sample.prompt}")
         print(f"  Compliance Cue: {sample.compliance_cue}")
         print(f"  Safety Trigger: {sample.safety_trigger[:50]}...")
@@ -142,7 +142,7 @@ def demo_data_building():
 def main():
     print("\n" + "=" * 60)
     print("IPO (Intervened Preference Optimization) Demo")
-    print("论文: Towards Safe Reasoning in Large Reasoning Models")
+    print("Paper: Towards Safe Reasoning in Large Reasoning Models")
     print("       via Corrective Intervention")
     print("=" * 60)
     

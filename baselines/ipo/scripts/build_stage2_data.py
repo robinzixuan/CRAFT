@@ -1,15 +1,15 @@
 """
-构建第二阶段训练数据（防止过度拒绝）
+Build Stage 2 training data (anti over-refusal).
 
-论文Section 4.1:
+Paper Section 4.1:
 "We notice that models trained on these safety-only datasets are inclined to over-refuse.
 To address this, we additionally use the 915 benign prompts from STAR-1 to construct
 a supplementary preference dataset, contrasting normal responses from base LRMs with
 refusal responses from trained LRMs, and apply DPO training as an additional stage."
 
-第二阶段数据格式:
-- chosen: base LRM对良性提示的正常回复
-- rejected: IPO训练后模型对良性提示的（错误的）拒绝回复
+Stage 2 data format:
+- chosen: normal response from base LRM to a benign prompt
+- rejected: (erroneous) refusal response from the IPO-trained model to the same benign prompt
 """
 
 import argparse
@@ -27,38 +27,38 @@ def parse_args():
         "--benign_prompts",
         type=str,
         default="data/star1_benign_prompts.json",
-        help="良性提示文件路径"
+        help="Path to benign prompts file"
     )
     parser.add_argument(
         "--base_model",
         type=str,
         default="deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
-        help="Base LRM模型名称"
+        help="Base LRM model name"
     )
     parser.add_argument(
         "--trained_model",
         type=str,
         default="./ipo_stage1_output",
-        help="第一阶段训练后的模型路径"
+        help="Path to the Stage 1 trained model"
     )
     parser.add_argument(
         "--output",
         type=str,
         default="data/stage2_train.json",
-        help="输出文件路径"
+        help="Output file path"
     )
     parser.add_argument(
         "--max_new_tokens",
         type=int,
         default=2048,
-        help="最大生成token数"
+        help="Maximum number of tokens to generate"
     )
     
     return parser.parse_args()
 
 
 def load_model(model_path: str):
-    """加载模型"""
+    """Load model and tokenizer."""
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
     
@@ -88,7 +88,7 @@ def load_model(model_path: str):
 
 
 def generate_response(model, tokenizer, prompt: str, max_new_tokens: int = 2048) -> str:
-    """生成回复"""
+    """Generate a response for the given prompt."""
     import torch
     import re
     
@@ -113,7 +113,7 @@ def generate_response(model, tokenizer, prompt: str, max_new_tokens: int = 2048)
     
     generated = tokenizer.decode(outputs[0], skip_special_tokens=False)
     
-    # 移除输入部分
+    # Remove input portion
     if input_text in generated:
         generated = generated.replace(input_text, "")
     
@@ -121,7 +121,7 @@ def generate_response(model, tokenizer, prompt: str, max_new_tokens: int = 2048)
 
 
 def is_refusal(response: str) -> bool:
-    """检测是否是拒绝回复"""
+    """Detect whether the response is a refusal."""
     import re
     
     refusal_patterns = [
@@ -156,14 +156,14 @@ def main():
     print("Building Stage 2 Data (Anti Over-Refusal)")
     print("=" * 60)
     print()
-    print("论文说明:")
-    print("  模型在safety-only数据集上训练后容易过度拒绝")
-    print("  使用915个良性提示构建补充偏好数据集:")
-    print("  - chosen: base LRM的正常回复")
-    print("  - rejected: 训练后模型的拒绝回复")
+    print("Paper note:")
+    print("  Models trained on safety-only datasets tend to over-refuse.")
+    print("  We build a supplementary preference dataset from 915 benign prompts:")
+    print("  - chosen: normal response from base LRM")
+    print("  - rejected: refusal response from the trained model")
     print()
     
-    # 加载良性提示
+    # Load benign prompts
     prompts_path = Path(__file__).parent.parent / args.benign_prompts
     with open(prompts_path, "r", encoding="utf-8") as f:
         benign_data = json.load(f)
@@ -171,41 +171,41 @@ def main():
     prompts = [item["prompt"] if isinstance(item, dict) else item for item in benign_data]
     print(f"Loaded {len(prompts)} benign prompts")
     
-    # 加载模型
-    print("\n加载Base模型...")
+    # Load models
+    print("\nLoading base model...")
     base_model, base_tokenizer = load_model(args.base_model)
-    
-    print("\n加载训练后模型...")
+
+    print("\nLoading trained model...")
     trained_model, trained_tokenizer = load_model(args.trained_model)
-    
-    # 生成回复并构建数据
+
+    # Generate responses and build dataset
     from tqdm import tqdm
     
     stage2_data = []
     refusal_count = 0
     
     for prompt in tqdm(prompts, desc="Generating responses"):
-        # Base模型的正常回复
+        # Normal response from base model
         base_response = generate_response(
             base_model, base_tokenizer, prompt, args.max_new_tokens
         )
         
-        # 训练后模型的回复
+        # Response from trained model
         trained_response = generate_response(
             trained_model, trained_tokenizer, prompt, args.max_new_tokens
         )
         
-        # 检查训练后模型是否错误地拒绝了
+        # Check whether the trained model incorrectly refuses
         if is_refusal(trained_response):
             refusal_count += 1
             stage2_data.append({
                 "prompt": prompt,
-                "chosen": base_response,  # 正常回复是preferred
-                "rejected": trained_response,  # 错误的拒绝是rejected
+                "chosen": base_response,  # normal response is preferred
+                "rejected": trained_response,  # erroneous refusal is rejected
             })
     
-    print(f"\n检测到 {refusal_count}/{len(prompts)} 个过度拒绝样本")
-    print(f"构建了 {len(stage2_data)} 个第二阶段训练样本")
+    print(f"\nDetected {refusal_count}/{len(prompts)} over-refusal samples")
+    print(f"Built {len(stage2_data)} Stage 2 training samples")
     
     # 保存
     output_path = Path(__file__).parent.parent / args.output
@@ -213,7 +213,7 @@ def main():
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(stage2_data, f, indent=2, ensure_ascii=False)
     
-    print(f"保存到 {output_path}")
+    print(f"Saved to {output_path}")
 
 
 if __name__ == "__main__":

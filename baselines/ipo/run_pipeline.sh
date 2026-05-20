@@ -1,6 +1,6 @@
 #!/bin/bash
-# IPO 完整训练Pipeline（基于论文Section 4.1 Training Settings）
-# 使用方法: bash run_pipeline.sh
+# IPO full training pipeline (based on paper Section 4.1 Training Settings)
+# Usage: bash run_pipeline.sh
 
 set -e
 
@@ -10,7 +10,7 @@ echo "论文: Towards Safe Reasoning in Large Reasoning Models"
 echo "       via Corrective Intervention"
 echo "============================================================"
 
-# 配置（可通过环境变量覆盖）
+# Configuration (can be overridden via environment variables)
 MODEL_NAME="${MODEL_NAME:-deepseek-ai/DeepSeek-R1-Distill-Llama-8B}"
 NUM_ROLLOUTS="${NUM_ROLLOUTS:-1}"          # 论文使用N=1
 NUM_TRIGGERS="${NUM_TRIGGERS:-6}"          # 论文使用6个safety triggers
@@ -19,7 +19,7 @@ OUTPUT_DIR="${OUTPUT_DIR:-./ipo_output}"
 SKIP_STAGE2="${SKIP_STAGE2:-false}"
 
 echo ""
-echo "Configuration (论文设置):"
+echo "Configuration (paper settings):"
 echo "  Model: $MODEL_NAME"
 echo "  Rollouts per prompt (N): $NUM_ROLLOUTS"
 echo "  Safety triggers: $NUM_TRIGGERS"
@@ -29,8 +29,8 @@ echo "  Skip Stage 2: $SKIP_STAGE2"
 echo ""
 
 # =============================================================
-# Step 1: 下载STAR-1数据集
-# 论文使用STAR-1的1000个有害提示 + 915个良性提示
+# Step 1: Download STAR-1 dataset
+# Paper uses 1,000 harmful prompts + 915 benign prompts from STAR-1
 # =============================================================
 echo "============================================================"
 echo "Step 1: Downloading STAR-1 dataset..."
@@ -40,8 +40,8 @@ echo "============================================================"
 python scripts/download_data.py
 
 # =============================================================
-# Step 2: 生成推理轨迹
-# 对每个有害提示，使用base LRM生成推理过程
+# Step 2: Generate reasoning rollouts
+# For each harmful prompt, generate reasoning using the base LRM
 # =============================================================
 echo ""
 echo "============================================================"
@@ -54,9 +54,9 @@ python scripts/generate_rollouts.py \
     --num_rollouts "$NUM_ROLLOUTS"
 
 # =============================================================
-# Step 3: 构建IPO训练数据
-# 执行Algorithm 1: 检测compliance cues → 用safety triggers替换
-# 论文: 对6个safety triggers各执行一次，合并数据集
+# Step 3: Build IPO training data
+# Execute Algorithm 1: detect compliance cues -> substitute with safety triggers
+# Paper: run once per safety trigger (6 total), then merge datasets
 # =============================================================
 echo ""
 echo "============================================================"
@@ -71,8 +71,8 @@ python scripts/build_data.py \
     --num_triggers "$NUM_TRIGGERS"
 
 # =============================================================
-# Step 4: IPO训练（第一阶段）
-# 使用DPO在偏好对上训练
+# Step 4: IPO Training (Stage 1 - Safety Alignment)
+# Train on preference pairs using DPO
 # =============================================================
 echo ""
 echo "============================================================"
@@ -85,8 +85,9 @@ python scripts/train_ipo.py \
     --epochs "$EPOCHS"
 
 # =============================================================
-# Step 5 & 6: 第二阶段训练（防止过度拒绝）
-# 论文: 使用915个良性提示，对比base LRM正常回复与训练后模型的拒绝回复
+# Step 5 & 6: Stage 2 Training (Anti Over-Refusal)
+# Paper: use 915 benign prompts; contrast base LRM normal responses
+# with the trained model's refusal responses
 # =============================================================
 if [ "$SKIP_STAGE2" != "true" ]; then
     echo ""
@@ -136,7 +137,7 @@ echo "============================================================"
 echo "Model saved to: $OUTPUT_DIR"
 echo "Evaluation results: ${OUTPUT_DIR}/eval_results.json"
 echo ""
-echo "论文期望的数据集大小参考:"
+echo "Expected dataset sizes from paper:"
 echo "  DS-8B: ~1,438 samples"
 echo "  DS-7B: ~1,346 samples"
 echo "  Qwen3-8B: ~520 samples"

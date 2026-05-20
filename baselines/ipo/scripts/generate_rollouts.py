@@ -1,6 +1,6 @@
 """
-Step 2: 使用LRM生成推理轨迹
-对每个有害提示，让模型生成推理过程（包含<think>标签）
+Step 2: Generate reasoning rollouts using an LRM.
+For each harmful prompt, the model generates its reasoning process (including <think> tags).
 """
 
 import argparse
@@ -17,49 +17,49 @@ def parse_args():
         "--model_name",
         type=str,
         default="Qwen/Qwen3-4B-Thinking-2507",
-        help="LRM模型名称"
+        help="LRM model name"
     )
     parser.add_argument(
         "--prompts_file",
         type=str,
         default="data/star1.json",
-        help="STAR-1数据集文件路径"
+        help="Path to the STAR-1 dataset file"
     )
     parser.add_argument(
         "--output_file",
         type=str,
         default="data/raw_rollouts.json",
-        help="输出文件路径"
+        help="Output file path"
     )
     parser.add_argument(
         "--num_rollouts",
         type=int,
         default=1,
-        help="每个提示的生成数量"
+        help="Number of rollouts per prompt"
     )
     parser.add_argument(
         "--max_new_tokens",
         type=int,
         default=2048,
-        help="最大生成token数"
+        help="Maximum number of tokens to generate"
     )
     parser.add_argument(
         "--temperature",
         type=float,
         default=0.6,
-        help="生成温度"
+        help="Sampling temperature"
     )
     return parser.parse_args()
 
 
 def load_model(model_name: str):
-    """加载模型"""
+    """Load model and tokenizer."""
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
     
     print(f"Loading model: {model_name}")
     
-    # 4bit量化配置
+    # 4-bit quantization configuration
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
@@ -91,7 +91,7 @@ def generate_rollouts(
     max_new_tokens: int = 2048,
     temperature: float = 0.7,
 ):
-    """生成推理轨迹"""
+    """Generate reasoning rollouts."""
     import torch
     from tqdm import tqdm
     import re
@@ -99,11 +99,11 @@ def generate_rollouts(
     all_samples = []
     total_tasks = len(prompts) * num_rollouts
     
-    # 外层进度条：显示提示处理进度
+    # Outer progress bar: prompt processing progress
     pbar = tqdm(
         prompts,
-        desc="生成推理轨迹",
-        unit="提示",
+        desc="Generating reasoning rollouts",
+        unit="prompt",
         ncols=100,
         bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]"
     )
@@ -118,12 +118,12 @@ def generate_rollouts(
         )
         inputs = tokenizer(input_text, return_tensors="pt").to(model.device)
         
-        # 内层进度条：显示每个提示的rollout生成进度（仅在num_rollouts > 1时显示）
+        # Inner progress bar: rollout progress per prompt (only shown when num_rollouts > 1)
         rollout_range = range(num_rollouts)
         if num_rollouts > 1:
             rollout_range = tqdm(
                 rollout_range,
-                desc=f"  提示 {prompt_idx+1}/{len(prompts)}",
+                desc=f"  Prompt {prompt_idx+1}/{len(prompts)}",
                 leave=False,
                 unit="rollout"
             )
@@ -141,11 +141,11 @@ def generate_rollouts(
             
             generated = tokenizer.decode(outputs[0], skip_special_tokens=False)
             
-            # 移除输入部分
+            # Remove input portion
             if input_text in generated:
                 generated = generated.replace(input_text, "")
             
-            # 解析推理和回复
+            # Parse reasoning and response
             think_match = re.search(r'<think>(.*?)</think>', generated, re.DOTALL)
             
             if think_match:
@@ -162,10 +162,10 @@ def generate_rollouts(
                     "response": response,
                 })
         
-        # 更新外层进度条信息
+        # Update outer progress bar
         pbar.set_postfix({
-            "已生成样本": len(all_samples),
-            "成功率": f"{len(all_samples)/((prompt_idx+1)*num_rollouts)*100:.1f}%"
+            "samples_generated": len(all_samples),
+            "success_rate": f"{len(all_samples)/((prompt_idx+1)*num_rollouts)*100:.1f}%"
         })
 
     return all_samples
@@ -178,19 +178,19 @@ def main():
     print("Step 2: Generate Reasoning Rollouts")
     print("=" * 60)
     
-    # 加载STAR-1数据集
+    # Load STAR-1 dataset
     prompts_path = Path(__file__).parent.parent / args.prompts_file
     with open(prompts_path, "r", encoding="utf-8") as f:
         star1_data = json.load(f)
     
-    # 从STAR-1数据中提取question字段作为提示
+    # Extract the 'question' field from STAR-1 data as prompts
     prompts = [item["question"] for item in star1_data if "question" in item]
     print(f"Loaded {len(prompts)} prompts from STAR-1 dataset")
     
-    # 加载模型
+    # Load model
     model, tokenizer = load_model(args.model_name)
     
-    # 生成rollouts
+    # Generate rollouts
     samples = generate_rollouts(
         model,
         tokenizer,
@@ -200,7 +200,7 @@ def main():
         temperature=args.temperature,
     )
     
-    # 保存
+    # Save
     output_path = Path(__file__).parent.parent / args.output_file
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:

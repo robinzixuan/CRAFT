@@ -1,8 +1,8 @@
 """
-IPO数据构建脚本
-从原始样本构建IPO训练数据
+IPO data building script.
+Builds IPO training data from raw samples.
 
-使用示例:
+Example usage:
     python scripts/build_data.py --input data/raw_samples.json --output data/ipo_train.json
 """
 
@@ -23,44 +23,44 @@ def parse_args():
         "--input",
         type=str,
         required=True,
-        help="输入JSON文件路径（包含prompt, reasoning, response字段）"
+        help="Input JSON file path (must contain prompt, reasoning, response fields)"
     )
     parser.add_argument(
         "--output",
         type=str,
         required=True,
-        help="输出JSON文件路径"
+        help="Output JSON file path"
     )
     parser.add_argument(
         "--prompt_key",
         type=str,
         default="prompt",
-        help="prompt字段名"
+        help="Field name for prompt"
     )
     parser.add_argument(
         "--reasoning_key",
         type=str,
         default="reasoning",
-        help="reasoning字段名"
+        help="Field name for reasoning"
     )
     parser.add_argument(
         "--response_key",
         type=str,
         default="response",
-        help="response字段名"
+        help="Field name for response"
     )
     parser.add_argument(
         "--num_triggers",
         type=int,
         default=1,
-        help="每个样本使用的安全触发器数量"
+        help="Number of safety triggers to use per sample"
     )
     parser.add_argument(
         "--format",
         type=str,
         choices=["dpo", "full"],
         default="dpo",
-        help="输出格式（dpo: 标准DPO格式, full: 包含所有信息）"
+        help="Output format (dpo: standard DPO format, full: includes all info)"
     )
     
     return parser.parse_args()
@@ -73,17 +73,17 @@ def main():
     print("Building IPO Training Data")
     print("=" * 60)
     
-    # 加载输入数据
+    # Load input data
     print(f"Loading data from {args.input}")
     with open(args.input, "r", encoding="utf-8") as f:
         samples = json.load(f)
     print(f"Loaded {len(samples)} samples")
     
-    # 创建数据构建器
+    # Create data builder
     intervention = ReasoningIntervention(use_rule_based=True)
     builder = IPODataBuilder(intervention=intervention)
     
-    # 构建IPO数据
+    # Build IPO data
     ipo_samples = builder.build_from_unsafe_samples(
         samples,
         prompt_key=args.prompt_key,
@@ -96,10 +96,10 @@ def main():
     print(f"\nBuilt {len(ipo_samples)} IPO samples")
     print(f"Conversion rate: {len(ipo_samples) / len(samples) * 100:.1f}%")
     
-    # 保存数据
+    # Save data
     builder.save_to_json(ipo_samples, args.output, format=args.format)
     
-    # 显示示例
+    # Show a sample
     if ipo_samples:
         print("\n" + "=" * 60)
         print("Sample IPO Data:")

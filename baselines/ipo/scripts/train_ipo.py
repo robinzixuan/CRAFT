@@ -1,6 +1,6 @@
 """
-IPO训练主脚本
-使用示例: python scripts/train_ipo.py --model_name deepseek-ai/DeepSeek-R1-Distill-Llama-8B
+IPO main training script.
+Example usage: python scripts/train_ipo.py --model_name deepseek-ai/DeepSeek-R1-Distill-Llama-8B
 """
 
 import argparse
@@ -8,7 +8,7 @@ import json
 import sys
 from pathlib import Path
 
-# 添加项目根目录到路径
+# Add project root directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from ipo import (
@@ -24,49 +24,49 @@ from ipo.data_builder import SyntheticDataGenerator
 def parse_args():
     parser = argparse.ArgumentParser(description="IPO Training Script")
     
-    # 数据参数
+    # Data arguments
     parser.add_argument(
-        "--train_data", 
-        type=str, 
+        "--train_data",
+        type=str,
         default=None,
-        help="训练数据JSON文件路径（如果不提供，使用合成数据）"
+        help="Path to training data JSON file (if not provided, synthetic data is used)"
     )
     parser.add_argument(
         "--eval_data",
         type=str,
         default=None,
-        help="评估数据JSON文件路径"
+        help="Path to evaluation data JSON file"
     )
-    
-    # 模型参数
+
+    # Model arguments
     parser.add_argument(
         "--model_name",
         type=str,
         default="deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
-        help="基础模型名称"
+        help="Base model name"
     )
     parser.add_argument(
         "--output_dir",
         type=str,
         default="./ipo_output",
-        help="输出目录"
+        help="Output directory"
     )
-    
-    # 训练参数
-    parser.add_argument("--epochs", type=int, default=3, help="训练轮数")
-    parser.add_argument("--batch_size", type=int, default=1, help="批次大小")
-    parser.add_argument("--grad_accum", type=int, default=8, help="梯度累积步数")
-    parser.add_argument("--lr", type=float, default=5e-5, help="学习率")
-    parser.add_argument("--beta", type=float, default=0.1, help="DPO beta参数")
-    
-    # LoRA参数
+
+    # Training arguments
+    parser.add_argument("--epochs", type=int, default=3, help="Number of training epochs")
+    parser.add_argument("--batch_size", type=int, default=1, help="Batch size")
+    parser.add_argument("--grad_accum", type=int, default=8, help="Gradient accumulation steps")
+    parser.add_argument("--lr", type=float, default=5e-5, help="Learning rate")
+    parser.add_argument("--beta", type=float, default=0.1, help="DPO beta parameter")
+
+    # LoRA arguments
     parser.add_argument("--lora_r", type=int, default=16, help="LoRA rank")
     parser.add_argument("--lora_alpha", type=int, default=32, help="LoRA alpha")
-    parser.add_argument("--no_lora", action="store_true", help="不使用LoRA")
-    parser.add_argument("--no_4bit", action="store_true", help="不使用4bit量化")
-    
-    # 其他
-    parser.add_argument("--seed", type=int, default=42, help="随机种子")
+    parser.add_argument("--no_lora", action="store_true", help="Disable LoRA")
+    parser.add_argument("--no_4bit", action="store_true", help="Disable 4-bit quantization")
+
+    # Misc
+    parser.add_argument("--seed", type=int, default=42, help="Random seed")
     parser.add_argument(
         "--use_synthetic",
         action="store_true",
@@ -83,11 +83,11 @@ def main():
     print("IPO (Intervened Preference Optimization) Training")
     print("=" * 60)
     
-    # 创建数据构建器
+    # Create data builder
     intervention = ReasoningIntervention(use_rule_based=True)
     data_builder = IPODataBuilder(intervention=intervention)
     
-    # 准备训练数据
+    # Prepare training data
     if args.train_data:
         print(f"Loading training data from {args.train_data}")
         train_dataset = data_builder.prepare_dataset_from_json(args.train_data)
@@ -102,12 +102,12 @@ def main():
         )
         print(f"Built {len(ipo_samples)} IPO samples")
         
-        # 保存合成数据
+        # Save synthetic data
         data_path = Path(args.output_dir) / "synthetic_train_data.json"
         data_path.parent.mkdir(parents=True, exist_ok=True)
         data_builder.save_to_json(ipo_samples, str(data_path), format="dpo")
         
-        # 创建dataset
+        # Create dataset
         train_dataset = data_builder.prepare_dataset(ipo_samples)
     else:
         print("Error: Please provide --train_data or --use_synthetic")
@@ -115,14 +115,14 @@ def main():
     
     print(f"Training dataset size: {len(train_dataset)}")
     
-    # 准备评估数据
+    # Prepare evaluation data
     eval_dataset = None
     if args.eval_data:
         print(f"Loading evaluation data from {args.eval_data}")
         eval_dataset = data_builder.prepare_dataset_from_json(args.eval_data)
         print(f"Evaluation dataset size: {len(eval_dataset)}")
     
-    # 创建训练配置
+    # Create training config
     config = IPOConfig(
         model_name=args.model_name,
         output_dir=args.output_dir,
@@ -149,7 +149,7 @@ def main():
     print(f"  LoRA: {config.use_lora} (r={config.lora_r}, alpha={config.lora_alpha})")
     print(f"  4-bit quantization: {config.use_4bit}")
     
-    # 创建训练器并训练
+    # Create trainer and train
     trainer = IPOTrainer(config)
     trainer.train(train_dataset, eval_dataset)
     

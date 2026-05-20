@@ -35,10 +35,10 @@ worker:
   actor:
     global_batch_size: 32
     micro_batch_size_per_device_for_update: 2
-    micro_batch_size_per_device_for_experience: 2  # 降低微批次，更稳定
+    micro_batch_size_per_device_for_experience: 2  # smaller micro-batch for more stable training
     max_grad_norm: 1.0
     padding_free: false
-    dynamic_batching: false  # 关闭动态批处理，避免分布式同步问题
+    dynamic_batching: false  # disable dynamic batching to avoid distributed-sync issues
     ulysses_size: 1
     model:
       model_path: Qwen/Qwen3-4B-Thinking-2507
@@ -59,11 +59,11 @@ worker:
       offload_optimizer: true  # keep optimizer on CPU to avoid OOM during load_checkpoint
 
   rollout:
-    n: 3
+    n: 8
     temperature: 0.6
     top_p: 0.95
     limit_images: 0
-    gpu_memory_utilization: 0.35  # 降低到 0.2 给 checkpoint gather 留空间
+    gpu_memory_utilization: 0.35  # lowered to leave headroom for checkpoint gather
     enforce_eager: true
     enable_chunked_prefill: false
     tensor_parallel_size: 4
@@ -76,10 +76,10 @@ worker:
   ref:
     fsdp:
       enable_full_shard: true
-      enable_cpu_offload: false  # 4 卡不需要 offload
+      enable_cpu_offload: false  # not needed with 4 GPUs
       enable_rank0_init: true
     offload:
-      offload_params: false  # 4 卡不需要 offload
+      offload_params: false  # not needed with 4 GPUs
 
   reward:
     reward_type: batch
@@ -92,15 +92,15 @@ worker:
     
 
 trainer:
-  total_epochs: 3  # 减少 epochs（原 15），GRPO 通常 3-5 epoch 足够
+  total_epochs: 3  # reduced epochs (was 15); GRPO typically needs only 3-5 epochs
   max_steps: null
   project_name: easy_r1
-  experiment_name: qwen3_4b_think_safety_2  # 修改：区分实验名称
+  experiment_name: qwen3_4b_think_safety_2  # updated to distinguish experiment names
   logger: ["file", "wandb"]
   nnodes: 1
   n_gpus_per_node: 4
   max_try_make_batch: 20  # -1 means no limit
-  val_freq: -1  # 禁用验证
+  val_freq: -1  # disable validation
   val_before_train: false
   val_only: false
   val_generations_to_log: 3

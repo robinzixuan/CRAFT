@@ -124,9 +124,9 @@ def train_latent_contrastive(
     tok=AutoTokenizer.from_pretrained(model_name)
     print(f"   - Loading language model from {model_name}...")
     lm =AutoModelForCausalLM.from_pretrained(model_name, output_hidden_states=True, torch_dtype=torch.bfloat16).eval().cuda()
-    hidden_size = lm.config.hidden_size  # 动态获取模型的 hidden_size
+    hidden_size = lm.config.hidden_size  # dynamically fetch model's hidden_size
     print(f"   - Initializing projection head (input_dim={hidden_size}, output_dim=512)...")
-    proj=ProjectionHead(d_in=hidden_size).cuda()  # 使用动态值而非硬编码
+    proj=ProjectionHead(d_in=hidden_size).cuda()  # use dynamic value instead of hard-coded constant
     print(f"   - Initializing safety head (3-way classification)...")
     head=SafetyHead(512).cuda()
     print(f"   - Setting up AdamW optimizer (lr=1e-4, weight_decay=0.01)...")

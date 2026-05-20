@@ -1,6 +1,6 @@
 """
-使用 JailbreakBench 数据集对 reasoningshield 模型进行越狱测试评估
-该模型是基于 99sweetcookie/reasoningshield-stage1-sft 的 DPO 微调版本
+Evaluate the ReasoningShield model against the JailbreakBench dataset.
+This model is a DPO fine-tuned version of 99sweetcookie/reasoningshield-stage1-sft.
 """
 
 import os
@@ -12,15 +12,15 @@ from tqdm import tqdm
 import jailbreakbench as jbb
 from jailbreakbench.config import TEMPERATURE, TOP_P
 
-# 基础模型和 LoRA 适配器路径
+# Base model and LoRA adapter paths
 BASE_MODEL_PATH = "99sweetcookie/reasoningshield-stage1-sft"
 LORA_PATH = "99sweetcookie/reasoningshield-stage2-dpo"
 
-# API key (用于 judge 评估)
+# API key (used for judge evaluation)
 API_KEY = os.environ.get("TOGETHER_API_KEY") or os.environ.get("OPENAI_API_KEY")
 
-# 加载基础模型
-print(f"正在加载基础模型: {BASE_MODEL_PATH}")
+# Load base model
+print(f"Loading base model: {BASE_MODEL_PATH}")
 tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_PATH, trust_remote_code=True)
 base_model = AutoModelForCausalLM.from_pretrained(
     BASE_MODEL_PATH,
@@ -29,21 +29,21 @@ base_model = AutoModelForCausalLM.from_pretrained(
     device_map="auto"
 )
 
-# 加载 LoRA 适配器
-print(f"正在加载 LoRA 适配器: {LORA_PATH}")
+# Load LoRA adapter
+print(f"Loading LoRA adapter: {LORA_PATH}")
 model = PeftModel.from_pretrained(base_model, LORA_PATH)
 model.eval()
 
-# 加载 JailbreakBench 数据集
+# Load JailbreakBench dataset
 dataset = jbb.read_dataset()
 goals = dataset.goals
 behaviors = dataset.behaviors
 
 def query_model(prompts: list[str], batch_size: int = 4) -> list[str]:
-    """使用 transformers 查询模型"""
+    """Query the model using transformers."""
     responses = []
     
-    for i in tqdm(range(0, len(prompts), batch_size), desc="生成中"):
+    for i in tqdm(range(0, len(prompts), batch_size), desc="Generating"):
         batch_prompts = prompts[i:i+batch_size]
         formatted_prompts = []
         
@@ -82,13 +82,13 @@ def query_model(prompts: list[str], batch_size: int = 4) -> list[str]:
     
     return responses
 
-# 批量查询模型
-print(f"开始查询 {len(goals)} 个 prompts...")
+# Query model in batch
+print(f"Starting query for {len(goals)} prompts...")
 responses = query_model(goals)
-print("查询完成!")
+print("Query complete!")
 
-# 保存模型响应
-print("\n=== 保存模型响应 ===")
+# Save model responses
+print("\n=== Saving Model Responses ===")
 responses_output_path = "./outputs/eval/jailbreakbench/jbb_reasoningshield_llama_responses.json"
 os.makedirs(os.path.dirname(responses_output_path), exist_ok=True)
 with open(responses_output_path, "w", encoding="utf-8") as f:
@@ -98,4 +98,4 @@ with open(responses_output_path, "w", encoding="utf-8") as f:
         "total": len(goals),
         "data": [{"behavior": b, "goal": g, "response": r} for b, g, r in zip(behaviors, goals, responses)]
     }, f, ensure_ascii=False, indent=2)
-print(f"模型响应已保存到: {responses_output_path}")
+print(f"Model responses saved to: {responses_output_path}")

@@ -19,5 +19,5 @@ PYTHON_BIN="${PYTHON_BIN:-python3}"
 echo "Using Python: $PYTHON_BIN"
 $PYTHON_BIN --version
 
-# 运行 JailbreakBench 评估脚本
+# Run JailbreakBench evaluation script
 $PYTHON_BIN "$SCRIPT_DIR/jbb_qwen.py"
