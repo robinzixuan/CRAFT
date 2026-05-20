@@ -24,10 +24,10 @@ After training, `./outputs/lclr/` contains:
 # Requires 1× A100 (40 GB) for the default Qwen3-4B-Thinking backbone.
 pip install -r requirements.txt
 
-python -m src.lclr.train_lca \
+cd src/lclr && python train_lca.py \
     --data_path chuhac/R2D-R1 \
     --model_name Qwen/Qwen3-4B-Thinking-2507 \
-    --output_dir ./outputs/lclr \
+    --output_dir ../../outputs/lclr \
     --epochs 3 \
     --batch_size 16
 ```
