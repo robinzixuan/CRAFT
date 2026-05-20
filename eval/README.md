@@ -13,17 +13,11 @@ CRAFT is evaluated along two axes:
 
 ### JailbreakBench (final-response + reasoning safety)
 
-The shell wrapper invokes `jbb_qwen.py` with a checkpoint path hard-coded
-near the top of the Python file:
-
-```python
-MODEL_PATH = "./checkpoints/qwen3_4b_thinking_craft"
-```
-
-Edit `MODEL_PATH` to point at your CRAFT checkpoint, then:
+Set `paths.craft_model` in `config.yaml` at the repo root to point at your
+CRAFT checkpoint, then:
 
 ```bash
-bash jailbreakbench/jbb_qwen.sh
+bash eval/jailbreakbench/jbb_qwen.sh
 ```
 
 The script produces per-prompt responses; `jbb_qwen.py` returns each

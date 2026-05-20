@@ -23,7 +23,6 @@ Full results across DeepSeek-R1-Distill-Llama-8B and Qwen3-4B-Thinking on Jailbr
 src/
   lclr/        Phase 1 — Latent Contrastive Learning for Reasoning (§4.1)
   r2l/         Phase 2 — Reinforcement over Reasoning Latents (§4.2, vLLM-based)
-baselines/     IPO and ReasoningShield (upstream forks)
 eval/          JailbreakBench, StrongReject, advanced-attack pointers
 docs/          Reproducibility guide and figures
 ```
@@ -79,9 +78,6 @@ See [`docs/reproducibility.md`](docs/reproducibility.md) for the exact hardware,
 Apache-2.0 (see [`LICENSE`](LICENSE)). CRAFT builds on:
 
 - [EasyR1](https://github.com/hiyouga/EasyR1) / [veRL](https://github.com/volcengine/verl) (Apache-2.0) — modified GRPO trainer under `src/r2l/verl/`
-- [ReasoningShield](https://github.com/changyi7231/ReasoningShield) — baseline under `baselines/reasoningshield/`
-- [IPO](https://github.com/intervention-preference-optimization/ipo) — baseline under `baselines/ipo/`
-
 See [`NOTICE`](NOTICE) for the full attribution list.
 
 ## Contact

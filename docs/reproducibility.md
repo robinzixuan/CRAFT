@@ -58,7 +58,7 @@ bash src/r2l/examples/scripts/train_<MODEL>.sh
 python src/r2l/scripts/model_merger.py --local_dir ./checkpoints/<EXP>/global_step_<N>/actor
 
 # 3. Evaluate
-bash eval/jailbreakbench/jbb_qwen.sh  # edit MODEL_PATH in jbb_qwen.py first
+bash eval/jailbreakbench/jbb_qwen.sh  # set paths in config.yaml at the repo root first
 python -c "from strongreject.evaluate import evaluate; import json, sys; data=json.load(open(sys.argv[1])); [print(evaluate(r['forbidden_prompt'],r['response'])) for r in data]" <output_from_jbb>.json
 ```
 
