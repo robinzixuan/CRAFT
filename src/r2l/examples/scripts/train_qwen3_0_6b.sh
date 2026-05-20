@@ -39,7 +39,7 @@ echo "Using Python: $PYTHON_BIN"
 $PYTHON_BIN --version
 
 $PYTHON_BIN -m verl.trainer.main \
-    config=examples/config_qwen_3_0.6b.yaml \
+    config=examples/configs/config_qwen3_0_6b.yaml \
     data.max_response_length=2048 \
     data.max_prompt_length=1024 \
     worker.actor.model.model_path=${MODEL_PATH} \
