@@ -125,6 +125,9 @@ bash eval/jailbreakbench/jbb_qwen.sh
 See [`docs/reproducibility.md`](docs/reproducibility.md) for hardware details, random seeds, and all per-table commands.
 
 ## Citation
+If you have any question regarding our paper or codes, please feel free to start an issue.
+
+If you use CRAFT in your work, please kindly cite our paper:
 
 ```bibtex
 @inproceedings{luo2026craft,
@@ -140,6 +143,16 @@ See [`docs/reproducibility.md`](docs/reproducibility.md) for hardware details, r
 ## License
 
 Apache-2.0 (see [`LICENSE`](LICENSE)). CRAFT builds on [EasyR1](https://github.com/hiyouga/EasyR1) / [veRL](https://github.com/volcengine/verl) (Apache-2.0) — see [`NOTICE`](NOTICE) for full attributions.
+
+## Acknowledgement
+We appreciate the following GitHub repos a lot for their valuable code and efforts.
+- EasyR1 (https://github.com/hiyouga/EasyR1)
+- veRL (https://github.com/volcengine/verl)
+- FROST (https://github.com/robinzixuan/FROST)
+- EM_PT (https://github.com/shivamag125/EM_PT)
+- BOOST (https://github.com/robinzixuan/XLLM)
+- vLLM (https://github.com/vllm-project/vllm)
+- StrongReject (https://github.com/dsbowen/strong_reject)
 
 ## Contact
 
