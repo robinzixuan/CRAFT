@@ -14,8 +14,7 @@ The repo contains:
 4. **Visualization Code**
   Generates plots of the learned latent space (e.g., t-SNE/PCA projections of safe vs. unsafe reasoning trace embeddings) to qualitatively verify the separation achieved by LCLR.
 
- 
-
+## Introduction
 CRAFT is a two-phase alignment framework that mitigates *superficial safety alignment* (SSA) in large reasoning models. Rather than operating at the output level, CRAFT (1) structures the latent space of reasoning traces via contrastive learning (LCLR), and (2) applies GRPO with a latent-aware reward that aligns intermediate reasoning states with the final response (R²L).
 
 ![CRAFT pipeline](docs/figures/pipeline.png)
