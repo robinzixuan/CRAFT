@@ -4,6 +4,18 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2603.17305-b31b1b)](https://arxiv.org/abs/2603.17305)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
+The repo contains:
+1. **Official Implementation**
+  The official implementation of [Contrastive Reasoning Alignment: Reinforcement Learning from Hidden Representations](https://arxiv.org/abs/2603.17305).
+2. **LCLR Code**
+  Structures the model's latent space by pulling safe and unsafe reasoning traces apart using a contrastive objective over hidden states.
+3. **GRPO Code**
+  Fine-tunes the model with GRPO using a three-part latent-aware reward that penalizes unsafe thinking mid-reasoning, not just unsafe final outputs.
+4. **Visualization Code**
+  Generates plots of the learned latent space (e.g., t-SNE/PCA projections of safe vs. unsafe reasoning trace embeddings) to qualitatively verify the separation achieved by LCLR.
+
+ 
+
 CRAFT is a two-phase alignment framework that mitigates *superficial safety alignment* (SSA) in large reasoning models. Rather than operating at the output level, CRAFT (1) structures the latent space of reasoning traces via contrastive learning (LCLR), and (2) applies GRPO with a latent-aware reward that aligns intermediate reasoning states with the final response (R²L).
 
 ![CRAFT pipeline](docs/figures/pipeline.png)
