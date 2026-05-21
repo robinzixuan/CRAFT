@@ -1,7 +1,7 @@
 # Reproducibility Guide
 
 This document lists the exact hardware, software, seeds, and commands that
-produced the numbers in the CRAFT ICML 2026 paper.
+produced the numbers in the CRAFT paper.
 
 ## Hardware
 
