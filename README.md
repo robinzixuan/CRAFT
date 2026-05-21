@@ -1,12 +1,9 @@
 # CRAFT: Contrastive Reasoning Alignment: Reinforcement Learning from Hidden Representations
 
-[![ICML 2026](https://img.shields.io/badge/ICML-2026-blue)](https://icml.cc)
-[![arXiv](https://img.shields.io/badge/arXiv-2603.17305-b31b1b)](https://arxiv.org/abs/2603.17305)
-[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
+
 
 The repo contains:
 1. **Official Implementation**
-  The official implementation of [Contrastive Reasoning Alignment: Reinforcement Learning from Hidden Representations](https://arxiv.org/abs/2603.17305).
 2. **LCLR Code**
   Structures the model's latent space by pulling safe and unsafe reasoning traces apart using a contrastive objective over hidden states.
 3. **GRPO Code**
