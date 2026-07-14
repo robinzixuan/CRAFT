@@ -127,10 +127,13 @@ If you have any question regarding our paper or codes, please feel free to start
 If you use CRAFT in your work, please kindly cite our paper:
 
 ```bibtex
-@article{luo2026contrastive,
-  title={Contrastive Reasoning Alignment: Reinforcement Learning from Hidden Representations},
-  author={Luo, Haozheng and Wang, Yimin and Yu, Jiahao and Wang, Binghui and Chen, Yan},
-  year={2026}
+@inproceedings{
+luo2026contrastive,
+title={Contrastive Reasoning Alignment: Reinforcement Learning from Hidden Representations},
+author={Haozheng Luo and Yimin Wang and Jiahao Yu and Binghui Wang and Yan Chen},
+booktitle={Forty-third International Conference on Machine Learning},
+year={2026},
+url={https://openreview.net/forum?id=56cQPBIg4R}
 }
 ```
 
